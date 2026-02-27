@@ -1,0 +1,49 @@
+extends layout.pug
+
+block title
+  | User Management
+
+block admin-content
+  .page-header
+    h2 All Users
+    p Users can be activated or deactivated. Deactivated users cannot log in.
+
+  table.admin-table
+    thead
+      tr
+        th Username
+        th Email
+        th Status
+        th Joined
+        th Last Login
+        th Current Room
+        th Actions
+    tbody
+      if users.length === 0
+        tr
+          td(colspan="7") No users found.
+      else
+        each user in users
+          tr(class=user.isActive ? '' : 'inactive')
+            td
+              a(href="/admin/users/" + user.id)= user.username
+            td= user.email || 'N/A'
+            td
+              if user.isActive
+                span.badge.badge-success Active
+              else
+                span.badge.badge-danger Inactive
+            td= new Date(user.createdAt).toLocaleDateString()
+            td
+              if user.lastLoginAt
+                = new Date(user.lastLoginAt).toLocaleDateString()
+              else
+                | Never
+            td= user.currentRoomId || 'None'
+            td.actions
+              if user.isActive
+                form(action="/admin/users/" + user.id + "/deactivate" method="POST" style="display:inline")
+                  button.button.button-small(type="submit") Deactivate
+              else
+                form(action="/admin/users/" + user.id + "/activate" method="POST" style="display:inline")
+                  button.button.button-small.button-success(type="submit") Activate

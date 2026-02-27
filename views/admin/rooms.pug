@@ -1,0 +1,48 @@
+extends layout.pug
+
+block title
+  | Room Management
+
+block admin-content
+  .page-header
+    h2 All Rooms
+    p Rooms can be closed (marked inactive) or permanently deleted.
+
+  table.admin-table
+    thead
+      tr
+        th Room ID
+        th Module
+        th Created
+        th Last Activity
+        th Max Players
+        th Status
+        th Actions
+    tbody
+      if rooms.length === 0
+        tr
+          td(colspan="7") No rooms found.
+      else
+        each room in rooms
+          tr(class=room.isActive ? '' : 'inactive')
+            td
+              a(href="/admin/rooms/" + room.id)= room.id
+            td= room.moduleName || 'default'
+            td= new Date(room.createdAt).toLocaleString()
+            td
+              if room.lastActivityAt
+                = new Date(room.lastActivityAt).toLocaleString()
+              else
+                | N/A
+            td= room.maxPlayers
+            td
+              if room.isActive
+                span.badge.badge-success Active
+              else
+                span.badge.badge-danger Inactive
+            td.actions
+              if room.isActive
+                form(action="/admin/rooms/" + room.id + "/close" method="POST" style="display:inline")
+                  button.button.button-small(type="submit") Close
+              form(action="/admin/rooms/" + room.id + "/delete" method="POST" style="display:inline" onsubmit="return confirm('Delete this room and all associated data? This cannot be undone.')")
+                button.button.button-small.button-danger(type="submit") Delete

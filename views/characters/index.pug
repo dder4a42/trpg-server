@@ -1,0 +1,53 @@
+extends ../layout
+
+//- Template context types for IDE type checking
+//- @type {Array<{_id: string, name: string, race: string, characterClass: string, level: number, currentHp: number, maxHp: number, armorClass: number}>} characters
+
+block title
+  | Characters - TRPG Game
+
+block main
+  .page-header
+    h1 Characters
+    .page-header-actions
+      a.btn(href='/' style='background: #475569;') Back to Home
+      a.btn(href='/characters/create') + Create New Character
+
+  .characters-list
+    if characters && characters.length
+      each char in characters
+        .character-card
+          .character-name= char.name
+          .character-summary
+            | #{char.race} #{char.characterClass} - Level #{char.level}
+          .character-stats
+            .stat HP: #{char.currentHp}/#{char.maxHp}
+            .stat AC: #{char.armorClass}
+          .character-actions
+            button.btn.view-details-btn(
+              data-character-id=char._id
+            ) View Details
+            button.btn.btn-danger.delete-character-btn(
+              data-character-id=char._id
+              data-confirm='Are you sure you want to delete this character?'
+            ) Delete
+    else
+      .empty-state
+        p No characters created yet.
+
+block modals
+  // Character Detail Modal
+  #character-modal.modal(data-modal-hidden='true')
+    .modal-content
+      .modal-header
+        h2#modal-character-name Character Name
+        button.modal-close(type='button') ✕
+      .modal-body
+        #modal-character-details
+      .modal-footer
+        button.modal-close.btn(type='button') Close
+
+  // Store character data for the modal
+  script.
+    window.charactersData = !{JSON.stringify(characters)};
+

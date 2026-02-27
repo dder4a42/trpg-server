@@ -1,0 +1,172 @@
+/* ============================================
+   PAGE-SPECIFIC STYLES
+   Extracted from inline styles in templates
+   ============================================ */
+
+/* ============================================
+   LOBBY PAGE
+   ============================================ */
+
+.lobby-error {
+  background: #2a0f0f;
+  border: 1px solid #7f1d1d;
+}
+
+.lobby-error p {
+  color: #fca5a5;
+}
+
+/* Room ID input with monospace font */
+.room-id-input {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* Room cards in lobby */
+.room-card {
+  transition: all 0.3s ease;
+}
+
+.room-card.full {
+  opacity: 0.6;
+  border-color: var(--danger);
+}
+
+.room-card.full:hover {
+  border-color: var(--danger);
+  box-shadow: 0 0 15px rgba(184, 71, 79, 0.3);
+}
+
+/* ============================================
+   CHARACTER CREATION PAGE
+   ============================================ */
+
+/* Cancel button style */
+.btn-cancel {
+  background: #475569;
+}
+
+.btn-cancel:hover {
+  background: #64748b;
+}
+
+/* ============================================
+   STATUS BADGES (Consolidated)
+   ============================================ */
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--danger);
+  color: var(--text-primary);
+  box-shadow: 0 0 10px rgba(184, 71, 79, 0.3);
+}
+
+.status-badge.danger {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+.status-badge.success {
+  background: var(--success);
+  color: #fff;
+}
+
+.status-badge.warning {
+  background: var(--warning);
+  color: #fff;
+}
+
+/* Status badge variants for different contexts */
+.status-badge.full {
+  background: #7f1d1d;
+  color: #fca5a5;
+  box-shadow: 0 0 10px rgba(127, 29, 29, 0.4);
+}
+
+.status-badge.suspended {
+  background: var(--warning);
+  color: var(--bg-deep);
+}
+
+/* ============================================
+   GAME PAGE SPECIFIC
+   ============================================ */
+
+/* Dynamic HP bar width via CSS variable */
+.game-page .hp-fill {
+  width: var(--hp-percent, 100%);
+}
+
+/* Tab content visibility */
+.tab-content {
+  display: block;
+}
+
+.tab-content.hidden {
+  display: none;
+}
+
+/* Input spinner for game actions */
+.input-spinner {
+  display: none;
+}
+
+.input-spinner.visible {
+  display: inline-block;
+}
+
+/* ============================================
+   ANIMATIONS (Moved from inline style block in layout.pug)
+   ============================================ */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-header {
+  animation: fade-in-up 0.6s ease-out;
+}
+
+.form-section,
+.character-card,
+.panel {
+  animation: fade-in-up 0.6s ease-out backwards;
+}
+
+/* Staggered animations for sequential elements */
+.form-section:nth-child(1) { animation-delay: 0.1s; }
+.form-section:nth-child(2) { animation-delay: 0.2s; }
+.form-section:nth-child(3) { animation-delay: 0.3s; }
+
+.character-card:nth-child(1) { animation-delay: 0.1s; }
+.character-card:nth-child(2) { animation-delay: 0.15s; }
+.character-card:nth-child(3) { animation-delay: 0.2s; }
+.character-card:nth-child(4) { animation-delay: 0.25s; }
+
+.message {
+  animation: fade-in-up 0.4s ease-out;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 640px) {
+  .status-badge {
+    font-size: 0.625rem;
+    padding: 0.2rem 0.5rem;
+  }
+}

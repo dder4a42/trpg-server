@@ -1,0 +1,177 @@
+extends ../layout
+
+//- Template context types for IDE type checking
+//- @type {string} title
+//- @type {string} roomId
+//- @type {{id: string, username: string}} user
+//- @type {{name: string, race: string, characterClass: string, level: number, currentHp: number, maxHp: number, armorClass: number, stats: object}} character
+
+block title
+  = title || 'TRPG Game'
+
+block main
+  // Game page specific scripts
+  script(type='module', src='/js/game-client.js')
+
+  // Meta tag for user ID (used by chat.js)
+  if user
+    meta(name='user-id' content=user.id)
+
+  .game-container(data-room-id=roomId)
+    // Left sidebar: Character info and Members
+    .panel
+      h2 Character
+      if character
+        .character-name= character.name
+        .character-info
+          span #{character.race} #{character.characterClass} Lv.#{character.level}
+
+        .stat-block
+          each stat, key in character.abilityScores
+            .stat
+              .stat-label= key.slice(0, 3).toUpperCase()
+              .stat-value= stat
+
+        .hp-section
+          .hp-label HP: #{character.currentHp}/#{character.maxHp}
+          .hp-bar
+            .hp-fill(style=`--hp-percent: ${(character.currentHp / character.maxHp) * 100}%`)
+
+        if character.statusEffects && character.statusEffects.length
+          .status-effects
+            each effect in character.statusEffects
+              .status-badge= effect
+      else
+        .empty-state
+          p No character loaded
+          .action-button
+            a.btn(href='/characters/create?returnTo=' + roomId) Create Your Character
+
+      // Room Members section
+      h3 Members
+      #members-list.members-list
+        .members-loading Loading...
+
+      if user
+        if isOwner
+          .leave-section
+            form(method='post', action=`/game/${roomId}/suspend`, onsubmit='return confirm("Return to lobby and suspend this room?")')
+              button.btn(type='submit') Return to Lobby
+
+    // Main area: Story and input
+    .panel.panel-content
+      // Story output area
+      #story-output.story-output
+        if history && history.length
+          each msg in history
+            .message(class=msg.role)
+              if msg.role === 'user'
+                .message-header You
+              else if msg.role === 'assistant'
+                .message-header DM
+              else if msg.role === 'system'
+                .message-header System
+              .message-content
+                | !{msg.content}
+        else
+          .empty-state Welcome to the game. What would you like to do?
+
+      // Input area
+      .input-area
+        form#action-form.action-form
+          input(type="hidden" name="roomId" value=roomId)
+          input(type="hidden" name="userId" value=user.id)
+          input(type="hidden" name="username" value=user.username)
+          if character
+            input(type="hidden" name="characterId" value=character.id)
+          input(type="hidden" name="stream" value="true")
+          textarea#action-input(
+            name="action"
+            placeholder="What do you do?"
+            autocomplete="off"
+            required
+            rows="2"
+            maxlength="1000"
+          )
+          button.btn(type="submit")
+            span Send
+            span#input-spinner.input-spinner ⌛
+
+    // Right sidebar: Status, Combat, Notes, Chat, Saves tabs
+    .panel
+      .sidebar-tabs-wrapper#sidebar-tabs-wrapper
+        .sidebar-tabs#sidebar-tabs
+          button.tab-btn.active(data-tab='status') Status
+          button.tab-btn(data-tab='combat-log') Combat
+          button.tab-btn(data-tab='notes') Notes
+          button.tab-btn(data-tab='chat') Chat
+          button.tab-btn(data-tab='saves') Saves
+        .sidebar-tabs-scroll-btns
+          button.sidebar-tabs-scroll-left#tab-scroll-left(type='button', aria-label='Scroll left') ‹
+          button.sidebar-tabs-scroll-right#tab-scroll-right(type='button', aria-label='Scroll right') ›
+
+      // Status panel
+      #status-panel.tab-content
+        h2 Status
+        #turn-gate-status.turn-gate-status
+        #status-body
+          if worldContext
+            include ../partials/status-bar.pug
+          else
+            .empty-state No status available
+
+      // Combat Log tab (separate tab for dedicated view)
+      #combat-log-panel.tab-content.hidden
+        h2 Combat Log
+        #combat-log-full.combat-log-full
+          .empty-state No dice rolls yet
+
+      // Chat panel
+      #chat-panel.tab-content.hidden
+        .chat-header
+          h3 Room Chat
+        #chat-messages.chat-messages
+          .chat-loading Loading...
+        .chat-input-area
+          form.chat-form(id='chat-form')
+            textarea(
+              name='message'
+              placeholder='Type a message...'
+              maxlength='1000'
+              rows='1'
+              autocomplete='off'
+              required
+            )
+            button(type='submit') Send
+
+      // Notes panel
+      #notes-panel.tab-content.hidden
+        .notes-header
+          h3 Player Notes
+        #player-notes-list.player-notes-list
+          if playerNotes && playerNotes.length > 0
+            each player in playerNotes
+              if player.notes && player.notes.length > 0
+                .note-group
+                  .note-group-name= player.name
+                  each note in player.notes
+                    .note-item(data-note-id=note.id data-user-id=player.userId)
+                      .note-content= note.content
+                      .note-delete(data-note-id=note.id) ×
+          else
+            .notes-empty.empty-state
+              p No notes yet. Add one below.
+        .note-input-area
+          textarea.note-input(
+            name='note'
+            placeholder='Add a note...'
+            maxlength='200'
+            rows='2'
+            autocomplete='off'
+          )
+          button.note-add(type='button') Add
+
+      // Saves panel
+      #saves-panel.tab-content.hidden
+        #save-menu.save-menu-container(data-room-id=roomId)
+          .save-loading Loading saves...

@@ -1,0 +1,29 @@
+// Save menu partial
+
+.save-menu
+  .save-form
+    label.save-label(for='save-slot-name') Slot Name
+    input#save-slot-name.save-input(type='text' name='slotName' placeholder='manual')
+    label.save-label(for='save-slot-desc') Description
+    input#save-slot-desc.save-input(type='text' name='description' placeholder='Optional notes')
+    button.btn(type='button' data-action='save') Save
+
+  .save-status(role='status' aria-live='polite')
+
+  ul.save-slots
+    if slots && slots.length
+      each slot in slots
+        li.save-slot
+          .save-slot-name= slot.saveName
+          if slot.description
+            .save-slot-desc= slot.description
+          .save-slot-meta
+            if slot.isAutoSave
+              span.save-slot-tag Auto
+            if slot.createdAt
+              span.save-slot-time= new Date(slot.createdAt).toLocaleString()
+          .save-slot-actions
+            button.btn(type='button' data-action='load' data-slot=slot.saveName) Load
+            button.btn(type='button' data-action='delete' data-slot=slot.saveName) Delete
+    else
+      li.empty-state No saves yet

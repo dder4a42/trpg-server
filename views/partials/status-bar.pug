@@ -1,0 +1,63 @@
+﻿//- Partial: Status bar for partial updates
+//- Context:
+//-   worldContext: { recentEvents: string[], worldFacts: string[], flags: Record<string,string> }
+//-   characterConditions: Array<{ characterId, characterName, conditions: ActiveCondition[] }>
+
+if worldContext
+  //- Location / Time header
+  if worldContext.flags.location || worldContext.flags.time
+    .status-location
+      if worldContext.flags.location
+        .status-location__item
+          span.status-location__icon 📍
+          span.status-location__value= worldContext.flags.location
+      if worldContext.flags.time
+        .status-location__item
+          span.status-location__icon 🕐
+          span.status-location__value= worldContext.flags.time
+
+  //- Character Conditions
+  if characterConditions && characterConditions.length
+    - const anyConditions = characterConditions.some(e => e.conditions && e.conditions.length)
+    if anyConditions
+      .status-section
+        .status-section__title Conditions
+        each entry in characterConditions
+          if entry.conditions && entry.conditions.length
+            .status-conditions__character
+              span.status-conditions__name= entry.characterName
+              .status-conditions__badges
+                each cond in entry.conditions
+                  .cond-badge(class=`cond--${cond.category || 'other'}` title=cond.mechanicalEffect || cond.source)
+                    span.cond-badge__name= cond.name
+                    span.cond-badge__exp(class=`exp--${cond.expires}`)= cond.expires
+
+  //- Recent Events
+  if worldContext.recentEvents && worldContext.recentEvents.length
+    .status-section
+      .status-section__title Recent Events
+      ul.status-list
+        each item in worldContext.recentEvents.slice().reverse().slice(0, 5)
+          li.status-list__item= item
+
+  //- World Facts
+  if worldContext.worldFacts && worldContext.worldFacts.length
+    .status-section
+      .status-section__title World State
+      ul.status-list.status-list--facts
+        each item in worldContext.worldFacts
+          li.status-list__item= item
+
+  //- Extra Flags
+  - const extraFlags = Object.entries(worldContext.flags).filter(([k]) => k !== 'location' && k !== 'time')
+  if extraFlags.length
+    .status-section
+      .status-section__title Flags
+      .status-flags
+        each pair in extraFlags
+          .status-flag
+            span.status-flag__key= pair[0]
+            span.status-flag__value= pair[1]
+
+else
+  .empty-state No status available

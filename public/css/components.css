@@ -1,0 +1,230 @@
+/* ============================================
+   REUSABLE UI COMPONENTS
+   Extracted from inline styles in templates
+   ============================================ */
+
+/* ============================================
+   AUTHENTICATION COMPONENTS
+   ============================================ */
+
+.auth-container {
+  max-width: 400px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(26, 22, 20, 0.95) 0%, rgba(36, 31, 28, 0.9) 100%);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(212, 165, 116, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 165, 116, 0.15);
+}
+
+/* Auth-specific form styling */
+.auth-container h1 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  color: var(--text-gold);
+  font-family: 'Cinzel', serif;
+}
+
+.auth-container > p {
+  text-align: center;
+  color: #a58c68;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
+.auth-container h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--text-gold);
+  font-size: 1.25rem;
+  font-family: 'Cinzel', serif;
+}
+
+.auth-container hr {
+  margin: 2rem 0;
+  border: none;
+  border-top: 1px solid rgba(212, 165, 116, 0.15);
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.625rem;
+  background: rgba(15, 12, 10, 0.8);
+  border: 1px solid rgba(212, 165, 116, 0.2);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 0.9375rem;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  background: var(--bg-rich);
+}
+
+.auth-error {
+  display: none;
+  padding: 0.75rem;
+  background: #7f1d1d;
+  border: 1px solid #b91c1c;
+  border-radius: 6px;
+  color: #fca5a5;
+  font-size: 0.875rem;
+}
+
+.auth-error.visible {
+  display: block;
+}
+
+/* Auth form group labels */
+.auth-container .form-group label {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: #a58c68;
+  font-size: 0.875rem;
+  font-family: 'Cinzel', serif;
+}
+
+/* ============================================
+   HOMEPAGE COMPONENTS
+   ============================================ */
+
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  background: #1e293b;
+  border-radius: 0.5rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-info span {
+  color: #94a3b8;
+}
+
+.user-info strong {
+  color: #e2e8f0;
+  font-size: 1.1rem;
+}
+
+.user-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.hero-section {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.hero-section h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #6366f1;
+}
+
+.hero-section p {
+  font-size: 1.125rem;
+  color: #94a3b8;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ============================================
+   GAME PAGE COMPONENTS
+   ============================================ */
+
+/* HP Bar with CSS Variable for dynamic width */
+.hp-section {
+  margin-bottom: var(--space-md);
+}
+
+.hp-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.375rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.hp-bar {
+  height: 8px;
+  background: var(--bg-input);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.hp-fill {
+  height: 100%;
+  width: var(--hp-percent, 100%); /* CSS variable for dynamic width */
+  background: linear-gradient(90deg, #b8474f 0%, #d4575f 100%);
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(184, 71, 79, 0.5);
+}
+
+/* Panel content variant - no padding for nested content */
+.panel-content {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  background: var(--bg-panel);
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+}
+
+/* ============================================
+   BUTTON STATE MODIFIERS
+   ============================================ */
+
+.btn.disabled,
+.btn:disabled {
+  background: #475569;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn.disabled:hover,
+.btn:disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 640px) {
+  .user-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+}

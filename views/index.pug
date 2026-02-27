@@ -1,0 +1,32 @@
+extends layout
+
+//- Template context types for IDE type checking
+//- @type {{id: string, username: string}} user
+//- @type {boolean} isAdmin
+//- @type {Array<{_id: string, name: string}>} rooms
+
+block title
+  | TRPG Game - Welcome
+
+block content
+  .container
+    // User info header
+    if user
+      .user-header
+        .user-info
+          span Welcome,
+          strong= user.username
+        .user-actions
+          if isAdmin
+            a.btn(href="/admin") Admin
+          form#logoutForm
+            button.btn Logout
+          a.btn(href="/characters") My Characters
+
+    .hero-section
+      h1 Welcome to TRPG
+      p An AI-powered tabletop role-playing game experience. Create your character, embark on adventures, and let the story unfold.
+
+      .hero-actions
+        a.btn.btn-primary(href="/lobby")
+          | Game Lobby

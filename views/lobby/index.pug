@@ -1,0 +1,84 @@
+extends ../layout
+
+//- Template context types for IDE type checking
+//- @type {string} error
+//- @type {Array<{id: string, createdAt: string, lastActivityAt: string, memberCount: number, maxPlayers: number, isFull: boolean, isMember: boolean, lifecycleState: string, ownerId: string}>} rooms
+
+block title
+  | Game Lobby - TRPG
+
+block main
+  .page-header
+    h1 Game Lobby
+    a.btn.btn-secondary(href='/') Back to Home
+
+  if error
+    .form-section.lobby-error
+      p
+        case error
+          when 'ROOM_ID_REQUIRED'
+            | Please enter a room ID.
+          when 'ROOM_NOT_FOUND'
+            | Room not found.
+          when 'ROOM_FULL'
+            | This room is full. Please choose another.
+          when 'ROOM_FORBIDDEN'
+            | You are not allowed to join this room.
+          when 'ROOM_SUSPENDED'
+            | This room is suspended. Please wait for owner to resume.
+          default
+            | Error: #{error}
+
+  .lobby-actions
+    .form-section
+      h2 Create New Room
+      form(method='post', action='/lobby/create')
+        .form-actions
+          button.btn(type='submit') Create and Enter Room
+
+    .form-section
+      h2 Join by Room ID
+      form(method='post', action='/lobby/join')
+        .form-group
+          input.room-id-input(
+            type='text'
+            name='roomId'
+            placeholder='Enter room ID to join'
+            required
+          )
+        .form-actions
+          button.btn(type='submit') Join Room
+
+  .form-section
+    h2 Available Rooms
+    if rooms && rooms.length
+      .characters-list
+        each room in rooms
+          .character-card.room-card(class=room.isFull ? 'full' : '')
+            .character-name= room.id
+            .character-summary Created: #{new Date(room.createdAt).toLocaleString()}
+            .character-summary Last activity: #{new Date(room.lastActivityAt).toLocaleString()}
+            .character-info
+              span Players: #{room.memberCount}/#{room.maxPlayers}
+              if room.isFull
+                span.status-badge.full FULL
+            .character-actions
+              if room.isFull && !room.isMember
+                button.btn.disabled(type='button') Room Full
+              else if room.lifecycleState === 'SUSPENDED' && room.ownerId === user.id
+                form(method='post', action='/lobby/join')
+                  input(type='hidden', name='roomId', value=room.id)
+                  button.btn(type='submit') Resume
+              else if room.lifecycleState === 'SUSPENDED'
+                button.btn.disabled(type='button') Suspended
+              else if room.isMember
+                form(method='post', action='/lobby/join')
+                  input(type='hidden', name='roomId', value=room.id)
+                  button.btn(type='submit') Resume
+              else
+                form(method='post', action='/lobby/join')
+                  input(type='hidden', name='roomId', value=room.id)
+                  button.btn(type='submit') Join
+    else
+      .empty-state
+        p No rooms available yet.

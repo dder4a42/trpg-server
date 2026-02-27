@@ -1,0 +1,55 @@
+extends ../layout.pug
+
+//- Template context types for IDE type checking
+//- @type {string} roomId
+
+block content
+  .ready-room-container(data-room-id=roomId)
+    .ready-room-header
+      h1 Ready Room
+      p.room-id Room ID: #{roomId}
+      #ready-room-error(style="display:none;")
+
+    .ready-room-grid
+      // Left column: module + characters + character card
+      .left-column
+        .panel
+          h2.panel-title Module
+          .module-row
+            span#module-label Default Adventure
+            select#module-select
+              option(value="Default Adventure") Default Adventure
+          .panel-subtitle#module-hint
+
+        .panel
+          h2.panel-title Your Characters
+          .panel-subtitle#character-selection-hint Click a character to preview; press Ready to lock.
+          #character-list.character-list
+            .empty-state Loading...
+
+        .panel
+          h2.panel-title Character Card
+          #character-card
+            .empty-state Select a character to see details.
+
+      // Right column: party + controls + chat
+      .right-column
+        .panel
+          h2.panel-title Party
+          .panel-subtitle#party-instructions Wait for all members to join and become ready.
+          #party-members
+            .empty-state Loading...
+
+          .party-actions
+            button#start-game-btn.btn.btn-primary(type="button") Enter Room
+
+        .panel
+          h2.panel-title Chat
+          #ready-room-chat
+            .chat-placeholder No messages yet. Say hi!
+          form#ready-room-chat-form
+            .chat-input-container
+              input#message-input(type="text" name="message" placeholder="Type a message..." autocomplete="off")
+              button.btn(type="submit") Send
+
+  script(src="/js/ready-room.js")

@@ -1,0 +1,109 @@
+extends layout.pug
+
+block title
+  | Room Details: #{room.id}
+
+block admin-content
+  .details-header
+    a.button(href="/admin/rooms") &larr; Back to Rooms
+    h2= room.id
+
+  .room-details-grid
+    .detail-card
+      h3 Room Information
+      .detail-row
+        .detail-label Room ID:
+        .detail-value.code= room.id
+      .detail-row
+        .detail-label Module:
+        .detail-value= room.moduleName || 'default'
+      .detail-row
+        .detail-label Status:
+        .detail-value
+          if room.isActive
+            span.badge.badge-success Active
+          else
+            span.badge.badge-danger Inactive
+      .detail-row
+        .detail-label Created:
+        .detail-value= new Date(room.createdAt).toLocaleString()
+      if room.lastActivityAt
+        .detail-row
+          .detail-label Last Activity:
+          .detail-value= new Date(room.lastActivityAt).toLocaleString()
+      .detail-row
+        .detail-label Max Players:
+        .detail-value= room.maxPlayers
+      .detail-row
+        .detail-label Max History Turns:
+        .detail-value= room.maxHistoryTurns
+      if room.saveName
+        .detail-row
+          .detail-label Save Name:
+          .detail-value= room.saveName
+
+  .room-stats
+    .stat-item
+      .stat-value= members.length
+      .stat-label Members
+    .stat-item
+      .stat-value= turnCount
+      .stat-label Conversation Turns
+    .stat-item
+      .stat-value= saveSlots.length
+      .stat-label Save Slots
+
+  if members && members.length > 0
+    h3 Room Members
+    table.admin-table
+      thead
+        tr
+          th User ID
+          th Character
+          th Joined At
+          th Status
+      tbody
+        each member in members
+          tr(class=member.isActive ? '' : 'inactive')
+            td= member.userId
+            td= member.characterId || 'None selected'
+            td= new Date(member.joinedAt).toLocaleString()
+            td
+              if member.isActive
+                span.badge.badge-success Active
+              else
+                span.badge.badge-danger Inactive
+  else
+    p No members in this room.
+
+  if saveSlots && saveSlots.length > 0
+    h3 Save Slots
+    table.admin-table
+      thead
+        tr
+          th ID
+          th Save Name
+          th Description
+          th Created
+          th Type
+      tbody
+        each slot in saveSlots
+          tr
+            td= slot.id
+            td= slot.saveName
+            td= slot.description || 'N/A'
+            td= new Date(slot.createdAt).toLocaleString()
+            td
+              if slot.isAutoSave
+                span.badge Auto-save
+              else
+                span.badge Manual
+  else
+    p No save slots for this room.
+
+  .room-actions
+    if room.isActive
+      form(action="/admin/rooms/#{room.id}/close" method="POST" style="display:inline")
+        button.button(type="submit") Close Room
+    form(action="/admin/rooms/#{room.id}/delete" method="POST" style="display:inline" onsubmit="return confirm('Delete this room and all associated data? This cannot be undone.')")
+      button.button.button-danger(type="submit") Delete Room

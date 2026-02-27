@@ -1,0 +1,34 @@
+extends layout.pug
+
+//- Template context types for IDE type checking
+//- @type {{users: {total: number, active: number, newThisWeek: number}, rooms: {totalRooms: number, activeRooms: number, totalSaves: number}}} stats
+
+block title
+  | Admin Dashboard
+
+block admin-content
+  .stats-grid
+    .stat-card
+      h3.stat-card-title Users
+      .stat-value= stats.users.total || 0
+      .stat-label Total users
+      .stat-sub Active: #{stats.users.active || 0}
+      .stat-sub New this week: #{stats.users.newThisWeek || 0}
+
+    .stat-card
+      h3.stat-card-title Rooms
+      .stat-value= stats.rooms.totalRooms || 0
+      .stat-label Total rooms
+      .stat-sub Active: #{stats.rooms.activeRooms || 0}
+      .stat-sub Saves: #{stats.rooms.totalSaves || 0}
+
+    .stat-card
+      h3.stat-card-title Characters
+      .stat-value= stats.characters || 0
+      .stat-label Total characters
+
+    .stat-card
+      h3.stat-card-title Storage
+      .stat-value= stats.databaseSize || 'Unknown'
+      .stat-label Database size
+      .stat-sub= stats.databasePath || './data/trpg.db'

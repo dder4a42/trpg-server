@@ -1,0 +1,155 @@
+extends ../layout
+
+block title
+  | Create Character - TRPG Game
+
+block main
+  .container
+    .page-header
+      h1 Create Character
+
+    form.character-form
+      .form-section
+        h2 Basic Information
+
+        .form-group
+          label Name *
+          input(
+            type='text'
+            name='name'
+            placeholder='Enter character name'
+            required
+            minlength='2'
+            maxlength='50'
+          )
+
+        .form-row
+          .form-group
+            label Race
+            select(name='race')
+              option(value='human') Human
+              option(value='elf') Elf
+              option(value='dwarf') Dwarf
+              option(value='halfling') Halfling
+              option(value='dragonborn') Dragonborn
+              option(value='gnome') Gnome
+              option(value='half-elf') Half-Elf
+              option(value='half-orc') Half-Orc
+              option(value='tiefling') Tiefling
+
+          .form-group
+            label Class
+            select(name='characterClass')
+              option(value='FIGHTER') Fighter
+              option(value='WIZARD') Wizard
+              option(value='CLERIC') Cleric
+              option(value='ROGUE') Rogue
+              option(value='RANGER') Ranger
+              option(value='PALADIN') Paladin
+              option(value='BARBARIAN') Barbarian
+              option(value='BARD') Bard
+              option(value='DRUID') Druid
+              option(value='MONK') Monk
+              option(value='SORCERER') Sorcerer
+              option(value='WARLOCK') Warlock
+
+        .form-row
+          .form-group
+            label Level
+            input(
+              type='number'
+              name='level'
+              value='1'
+              min='1'
+              max='20'
+            )
+
+          .form-group
+            label Alignment
+            select(name='alignment')
+              option(value='Lawful Good') Lawful Good
+              option(value='Neutral Good') Neutral Good
+              option(value='Chaotic Good') Chaotic Good
+              option(value='Lawful Neutral') Lawful Neutral
+              option(value='True Neutral') True Neutral
+              option(value='Chaotic Neutral') Chaotic Neutral
+              option(value='Lawful Evil') Lawful Evil
+              option(value='Neutral Evil') Neutral Evil
+              option(value='Chaotic Evil') Chaotic Evil
+
+      .form-section
+        h2 Ability Scores
+
+        .ability-scores-grid
+          .ability-score
+            label Strength
+            input(type='number', name='abilityScores.strength', value='10', min='1', max='30')
+            span.modifier +0
+
+          .ability-score
+            label Dexterity
+            input(type='number', name='abilityScores.dexterity', value='10', min='1', max='30')
+            span.modifier +0
+
+          .ability-score
+            label Constitution
+            input(type='number', name='abilityScores.constitution', value='10', min='1', max='30')
+            span.modifier +0
+
+          .ability-score
+            label Intelligence
+            input(type='number', name='abilityScores.intelligence', value='10', min='1', max='30')
+            span.modifier +0
+
+          .ability-score
+            label Wisdom
+            input(type='number', name='abilityScores.wisdom', value='10', min='1', max='30')
+            span.modifier +0
+
+          .ability-score
+            label Charisma
+            input(type='number', name='abilityScores.charisma', value='10', min='1', max='30')
+            span.modifier +0
+
+      .form-section
+        h2 Background
+
+        .form-group
+          label Background
+          input(
+            type='text'
+            name='background'
+            placeholder='e.g., Soldier, Sage, Criminal'
+          )
+
+        .form-group
+          label Appearance
+          textarea(
+            name='appearance'
+            rows='3'
+            placeholder='Describe your character\'s appearance...'
+          )
+
+        .form-group
+          label Personality Traits
+          textarea(
+            name='personalityTraits'
+            rows='2'
+            placeholder='Personality traits...'
+          )
+
+        .form-group
+          label Backstory
+          textarea(
+            name='backstory'
+            rows='4'
+            placeholder='Character history and background...'
+          )
+
+      .form-actions
+        button.btn(type='submit') Create Character
+        a.btn.btn-cancel(
+          href='/characters'
+        ) Cancel
+
+    #form-result

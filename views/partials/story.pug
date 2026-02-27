@@ -1,0 +1,18 @@
+//- Partial: Story output for partial updates
+//- This template renders without layout for partial swaps
+
+each msg in history
+  .message(class=msg.role, data-timestamp=msg.timestamp)
+    if msg.role === 'user'
+      .message-header You
+    else if msg.role === 'assistant'
+      .message-header DM
+    else if msg.role === 'system'
+      .message-header System
+    .message-content
+      | !{msg.content}
+
+if history.length === 0
+  .empty-state
+    p The story begins here...
+    p Type your action below to start the adventure.

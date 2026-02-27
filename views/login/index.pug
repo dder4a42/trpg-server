@@ -1,0 +1,48 @@
+extends ../layout
+
+block title
+  | Login - TRPG
+
+block content
+  .container
+    .auth-container
+      h1 TRPG
+      p Sign in to continue your adventure
+
+      // Login Form
+      form#loginForm
+        .form-group
+          label(for="usernameOrEmail") Username or Email
+          input#usernameOrEmail.auth-input(type="text" name="usernameOrEmail" required placeholder="Enter username or email")
+
+        .form-group
+          label(for="password") Password
+          input#password.auth-input(type="password" name="password" required placeholder="Enter password")
+
+        #loginError.auth-error
+
+        button.btn(type="submit")
+          | Sign In
+
+      hr
+
+      // Register Form
+      h2 Create Account
+
+      form#registerForm
+        .form-group
+          label(for="regUsername") Username
+          input#regUsername.auth-input(type="text" name="username" required minlength="3" maxlength="30" placeholder="Choose a username")
+
+        .form-group
+          label(for="regEmail") Email
+          input#regEmail.auth-input(type="email" name="email" required placeholder="Enter your email")
+
+        .form-group
+          label(for="regPassword") Password
+          input#regPassword.auth-input(type="password" name="password" required minlength="8" placeholder="Create a password (min 8 chars)")
+
+        #registerError.auth-error
+
+        button.btn(type="submit")
+          | Create Account

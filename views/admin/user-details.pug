@@ -1,0 +1,62 @@
+extends layout.pug
+
+block title
+  | User Details: #{user.username}
+
+block admin-content
+  .details-header
+    a.button(href="/admin/users") &larr; Back to Users
+    h2= user.username
+
+  .user-details-grid
+    .detail-card
+      h3 Account Information
+      .detail-row
+        .detail-label Username:
+        .detail-value= user.username
+      .detail-row
+        .detail-label Email:
+        .detail-value= user.email || 'N/A'
+      .detail-row
+        .detail-label Status:
+        .detail-value
+          if user.isActive
+            span.badge.badge-success Active
+          else
+            span.badge.badge-danger Inactive
+      .detail-row
+        .detail-label User ID:
+        .detail-value.code= user.id
+      .detail-row
+        .detail-label Joined:
+        .detail-value= new Date(user.createdAt).toLocaleString()
+      if user.lastLoginAt
+        .detail-row
+          .detail-label Last Login:
+          .detail-value= new Date(user.lastLoginAt).toLocaleString()
+      if user.currentRoomId
+        .detail-row
+          .detail-label Current Room:
+          .detail-value
+            a(href="/admin/rooms/#{user.currentRoomId}")= user.currentRoomId
+
+  if characters && characters.length > 0
+    h3 Characters (#{characters.length})
+    table.admin-table
+      thead
+        tr
+          th Name
+          th Race
+          th Class
+          th Level
+          th HP
+      tbody
+        each char in characters
+          tr
+            td= char.name
+            td= char.race
+            td= char.characterClass
+            td= char.level
+            td #{char.currentHp}/#{char.maxHp}
+  else
+    p No characters found for this user.

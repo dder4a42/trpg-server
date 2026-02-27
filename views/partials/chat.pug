@@ -1,0 +1,25 @@
+// Chat panel partial
+mixin chat-panel(roomId, user)
+  .chat-panel
+    .chat-header
+      h3 Room Chat
+      span.chat-status(title='Connected to room')
+
+    .chat-messages#chat-messages
+      .chat-loading Loading messages...
+
+    .chat-input-area
+      form.chat-form(
+        id='chat-form'
+        action=`/api/chat/rooms/${roomId}/send`
+        method='POST'
+      )
+        input(
+          type='text'
+          name='message'
+          placeholder='Type a message...'
+          maxlength='1000'
+          autocomplete='off'
+          required
+        )
+        button(type='submit') Send

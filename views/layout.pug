@@ -1,0 +1,38 @@
+doctype html
+html(lang='zh-CN')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title
+      block title
+        | TRPG Game
+
+    // Preload critical resources (hint to browser to fetch early)
+    link(rel='preload', href='/css/fantasy-theme.css', as='style')
+
+    // Dark Fantasy Theme
+    link(rel='stylesheet', href='/css/fantasy-theme.css')
+    // Reusable UI Components
+    link(rel='stylesheet', href='/css/components.css')
+    // Page-specific Styles
+    link(rel='stylesheet', href='/css/pages.css')
+    // Game Page Styles
+    link(rel='stylesheet', href='/css/game.css')
+    // Admin Dashboard Styles
+    link(rel='stylesheet', href='/css/admin.css')
+    // Ready Room Styles
+    link(rel='stylesheet', href='/css/ready-room.css')
+
+    // Global scripts (ES modules)
+    script(type='module', src='/js/main.js')
+    // Legacy scripts (character modal)
+    script(defer, src='/js/character-modal.js')
+
+  body
+    // Page-specific content
+    block content
+      .container
+        block main
+
+    // Modal anchor
+    block modals

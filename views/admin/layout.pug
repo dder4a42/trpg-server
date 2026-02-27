@@ -1,0 +1,14 @@
+extends ../layout.pug
+
+block content
+  .admin-container
+    .admin-nav
+      a.admin-nav-item(href="/admin") Dashboard
+      a.admin-nav-item(href="/admin/users") Users
+      a.admin-nav-item(href="/admin/rooms") Rooms
+      a.admin-nav-item(href="/admin/characters") Characters
+      a.admin-nav-item(href="/") Exit Admin
+
+    .admin-content
+      h1.admin-title= title || 'Admin'
+      block admin-content

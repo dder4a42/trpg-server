@@ -1,0 +1,36 @@
+extends layout.pug
+
+block title
+  | Character Management
+
+block admin-content
+  .page-header
+    h2 All Characters
+    p View and manage all character cards in the system.
+
+  table.admin-table
+    thead
+      tr
+        th Name
+        th Player (User ID)
+        th Race
+        th Class
+        th Level
+        th HP
+        th Actions
+    tbody
+      if characters.length === 0
+        tr
+          td(colspan="7") No characters found.
+      else
+        each char in characters
+          tr
+            td= char.name
+            td= char.userId || 'Unknown'
+            td= char.race
+            td= char.characterClass
+            td= char.level
+            td #{char.currentHp}/#{char.maxHp}
+            td.actions
+              form(action="/admin/characters/" + char.id + "/delete" method="POST" style="display:inline" onsubmit="return confirm('Delete this character? This cannot be undone.')")
+                button.button.button-small.button-danger(type="submit") Delete
