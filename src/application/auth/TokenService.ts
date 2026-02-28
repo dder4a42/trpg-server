@@ -58,7 +58,7 @@ export class TokenService implements ITokenService {
     const payload: TokenPayload = {
       userId: user.id,
       username: user.username,
-      isAdmin: user.username === (process.env.ADMIN_USERNAME || 'admin'),
+      isAdmin: !!user.isAdmin,
       iat: now,
       exp,
       jti,

@@ -160,11 +160,10 @@ export class AuthModule {
   // ==================== Utilities ====================
 
   /**
-   * Check if a user is admin (based on ADMIN_USERNAME environment variable)
+   * Check if a user is admin
    */
   isAdmin(user: User | undefined): boolean {
-    const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
-    return !!user && !!ADMIN_USERNAME && user.username === ADMIN_USERNAME;
+    return !!user && !!user.isAdmin;
   }
 
   /**
