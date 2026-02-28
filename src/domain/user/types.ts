@@ -12,6 +12,9 @@ export interface User {
   isActive: boolean;             // Account status
   createdAt: Date;
   lastLoginAt: Date | null;
+  // Security fields
+  failedLoginAttempts: number;   // Failed login attempts counter
+  lockedUntil: Date | null;      // Account locked until this time
 }
 
 /**
@@ -22,8 +25,11 @@ export interface UserSession {
   userId: string;
   createdAt: Date;
   expiresAt: Date;
+  lastActivityAt: Date;          // For sliding expiration
   ipAddress?: string;
   userAgent?: string;
+  deviceName?: string;           // User-friendly device name (e.g., "iPhone - Safari")
+  deviceFingerprint?: string;    // Device fingerprint for tracking
 }
 
 /**

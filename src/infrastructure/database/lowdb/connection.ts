@@ -9,8 +9,10 @@ import { mkdirSync } from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Database schema definition matching the SQL schema
+// Database schema definition with version field for optimistic locking
 export interface DatabaseSchema {
+  _version: number;           // Version for optimistic locking (incremented on write)
+  _lastCleanup?: string;      // Last cleanup timestamp for maintenance jobs
   users: UserRecord[];
   rooms: RoomRecord[];
   characters: CharacterRecord[];
@@ -30,6 +32,9 @@ export interface UserRecord {
   created_at: string;
   last_login?: string;
   is_active: number;
+  // Security fields for account lockout
+  failed_login_attempts: number;
+  locked_until?: string;
 }
 
 export interface RoomRecord {
@@ -164,18 +169,37 @@ export interface CharacterStateRecord {
   equipment_wielded: string;
 }
 
-// User session for auth system
+// User session for auth system (enhanced with expiration tracking)
 export interface UserSessionRecord {
-  id: string;           // Session token (UUID)
-  user_id: string;      // User ID
+  id: string;                    // Session token (UUID)
+  user_id: string;               // User ID
   created_at: string;
   expires_at: string;
+  last_activity_at?: string;     // For sliding expiration
   ip_address?: string;
   user_agent?: string;
+  refresh_token?: string;        // For dual-token system (future)
+  refresh_expires_at?: string;   // Refresh token expiration (future)
+  family_id?: string;            // Token family for rotation (future)
+  device_name?: string;          // User-friendly device name
+  device_fingerprint?: string;   // Device fingerprint for tracking
+  status?: 'active' | 'revoked' | 'expired';  // Session status (future)
+  revoked_at?: string;           // When session was revoked (future)
+  revoked_reason?: string;       // Reason for revocation (future)
+}
+
+// Error class for version conflicts
+export class VersionConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'VersionConflictError';
+  }
 }
 
 // Default data for new database
 const defaultData: DatabaseSchema = {
+  _version: 1,
+  _lastCleanup: undefined,
   users: [],
   rooms: [],
   characters: [],
@@ -241,6 +265,86 @@ export class DatabaseConnection {
    */
   async write(): Promise<void> {
     await this.db.write();
+  }
+
+  /**
+   * Read data from disk (explicit read-before-write pattern)
+   * Ensures we have the latest data before making modifications
+   */
+  async read(): Promise<void> {
+    await this.db.read();
+  }
+
+  /**
+   * Write with version check for optimistic locking
+   * Throws VersionConflictError if version has changed
+   */
+  async writeWithVersionCheck(expectedVersion: number): Promise<void> {
+    const currentVersion = this.db.data._version;
+    if (currentVersion !== expectedVersion) {
+      throw new VersionConflictError(
+        `Version conflict: expected ${expectedVersion}, got ${currentVersion}`
+      );
+    }
+    // Increment version and write
+    this.db.data._version = currentVersion + 1;
+    await this.db.write();
+  }
+
+  /**
+   * Atomic update with optimistic locking and retry
+   * Use this for complex updates that need to be atomic
+   */
+  async atomicUpdate<T>(
+    updater: (data: DatabaseSchema) => T,
+    options?: { maxRetries?: number }
+  ): Promise<T> {
+    const maxRetries = options?.maxRetries ?? 3;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      // Read current state
+      await this.read();
+      const data = this.getData();
+      const version = data._version;
+
+      try {
+        // Apply update
+        const result = updater(data);
+
+        // Write with version check
+        await this.writeWithVersionCheck(version);
+        return result;
+      } catch (e) {
+        if (e instanceof VersionConflictError && attempt < maxRetries - 1) {
+          // Retry with fresh data
+          continue;
+        }
+        throw e;
+      }
+    }
+
+    throw new Error('Max retries exceeded in atomicUpdate');
+  }
+
+  /**
+   * Get current version
+   */
+  getVersion(): number {
+    return this.db.data._version;
+  }
+
+  /**
+   * Update cleanup timestamp
+   */
+  updateCleanupTimestamp(): void {
+    this.db.data._lastCleanup = new Date().toISOString();
+  }
+
+  /**
+   * Get last cleanup timestamp
+   */
+  getLastCleanup(): Date | null {
+    return this.db.data._lastCleanup ? new Date(this.db.data._lastCleanup) : null;
   }
 
   /**

@@ -12,7 +12,8 @@
     "dev": "tsx watch src/server.ts",
     "clean": "rimraf dist",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts"
+    "lint": "eslint src --ext .ts",
+    "migrate:session-devices": "tsx scripts/migrate-session-devices.ts"
   },
   "keywords": [
     "trpg",

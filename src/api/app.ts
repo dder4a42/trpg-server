@@ -132,9 +132,10 @@ export function createApp(config: Partial<AppConfig> = {}): Application {
     // Inject authModule into web routes
     setAuthModule(config.authModule);
 
-    // Create auth router from authModule's authService
+    // Create auth router from authModule's authService and tokenService
     const authService = (config.authModule as any)['authService'];
-    app.use('/auth', createAuthRouter(authService));
+    const tokenService = (config.authModule as any)['tokenService'];
+    app.use('/auth', createAuthRouter(authService, tokenService));
   }
 
   // Web routes (pages) - authModule will be used internally

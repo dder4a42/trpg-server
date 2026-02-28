@@ -5,6 +5,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { createError } from './errorHandler.js';
 import type { User } from '@/domain/user/types.js';
 import type { AuthService } from '@/application/auth/AuthService.js';
+import type { TokenService } from '@/application/auth/TokenService.js';
 
 /**
  * Extract session ID from request (cookie or Authorization header)
@@ -24,12 +25,19 @@ export function extractSessionId(req: Request): string | undefined {
  * Authentication Module - provides both API and web auth helpers
  */
 export class AuthModule {
+  readonly authService: AuthService;
+  readonly tokenService?: TokenService;
+
   constructor(
-    private readonly authService: AuthService,
+    authService: AuthService,
+    tokenService?: TokenService,
     private readonly options: {
       webLoginPath?: string;
     } = {}
-  ) {}
+  ) {
+    this.authService = authService;
+    this.tokenService = tokenService;
+  }
 
   /**
    * Validate session and return user (internal method)
@@ -197,7 +205,8 @@ export class AuthModule {
  */
 export function createAuthModule(
   authService: AuthService,
+  tokenService?: TokenService,
   options?: { webLoginPath?: string }
 ): AuthModule {
-  return new AuthModule(authService, options);
+  return new AuthModule(authService, tokenService, options);
 }

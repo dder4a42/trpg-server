@@ -13,6 +13,7 @@ import {
   RoomMembershipRepository,
   GameStateRepository,
 } from './lowdb/index.js';
+import { SessionCleanupJob, defaultCleanupConfig } from './lowdb/SessionCleanupJob.js';
 
 export class DatabaseService {
   // Repositories
@@ -24,6 +25,9 @@ export class DatabaseService {
   public readonly roomMemberships: RoomMembershipRepository;
   public readonly gameStates: GameStateRepository;
 
+  // Cleanup job
+  private sessionCleanupJob: SessionCleanupJob | null = null;
+
   private constructor(db: Awaited<ReturnType<typeof getDatabase>>) {
     // Initialize repositories with LowDB connection
     this.characters = new CharacterRepository(db);
@@ -33,6 +37,12 @@ export class DatabaseService {
     this.userSessions = new UserSessionRepository(db);
     this.roomMemberships = new RoomMembershipRepository(db);
     this.gameStates = new GameStateRepository(db);
+
+    // Initialize cleanup job
+    this.sessionCleanupJob = new SessionCleanupJob(
+      this.userSessions,
+      defaultCleanupConfig()
+    );
   }
 
   /**
@@ -42,6 +52,8 @@ export class DatabaseService {
     const db = await getDatabase(config);
     if (!instance) {
       instance = new DatabaseService(db);
+      // Auto-start cleanup job
+      instance.startSessionCleanup();
     }
     return instance;
   }
@@ -60,9 +72,34 @@ export class DatabaseService {
    * Close the database connection
    */
   static async close(): Promise<void> {
+    if (instance) {
+      // Stop cleanup job first
+      instance.sessionCleanupJob?.stop();
+    }
     const { closeDatabase } = await import('./lowdb/index.js');
     await closeDatabase();
     instance = null;
+  }
+
+  /**
+   * Start the session cleanup job
+   */
+  startSessionCleanup(): void {
+    this.sessionCleanupJob?.start();
+  }
+
+  /**
+   * Stop the session cleanup job
+   */
+  stopSessionCleanup(): void {
+    this.sessionCleanupJob?.stop();
+  }
+
+  /**
+   * Get cleanup job status
+   */
+  getCleanupStatus() {
+    return this.sessionCleanupJob?.getStatus() || null;
   }
 
   /**
