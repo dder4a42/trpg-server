@@ -148,11 +148,13 @@ export class AuthService implements IAuthService {
       // Check if account is active
       if (!user.isActive) {
         authMetrics.increment(AUTH_METRICS.LOGIN_FAILURE);
+        // Log specific reason internally
         authLogger.warn('Login failed: account deactivated', {
           userId: user.id,
           username: user.username,
         });
-        throw new AuthError('Account is deactivated', 'ACCOUNT_DEACTIVATED');
+        // Return generic message externally (prevent enumeration)
+        throw new AuthError('Invalid credentials', 'INVALID_CREDENTIALS');
       }
 
       // Verify password
@@ -234,7 +236,7 @@ export class AuthService implements IAuthService {
    */
   async logout(sessionId: string): Promise<boolean> {
     try {
-      const result = this.sessionRepo.delete(sessionId);
+      const result = await this.sessionRepo.delete(sessionId);
 
       if (result) {
         authMetrics.increment(AUTH_METRICS.LOGOUT);
