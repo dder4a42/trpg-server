@@ -31,6 +31,9 @@ let cleanupTimer: NodeJS.Timeout | null = null;
 
 /**
  * Start automatic cleanup of expired entries
+ *
+ * Note: Uses timer.unref() to allow the Node process to exit naturally
+ * when there's no other work keeping the event loop alive.
  */
 function startAutomaticCleanup(): void {
   if (cleanupTimer) return;
@@ -38,6 +41,9 @@ function startAutomaticCleanup(): void {
   cleanupTimer = setInterval(() => {
     cleanupRevokedTokens();
   }, CLEANUP_INTERVAL_MS);
+
+  // Allow process to exit naturally when there's no other work
+  cleanupTimer.unref();
 
   // Also run on module load
   cleanupRevokedTokens();
@@ -127,13 +133,18 @@ export function isTokenRevoked(jti: string): boolean {
  * This requires a list of jti claims - typically tracked via RefreshTokenService
  * @param jtis Array of JWT ID claims to revoke
  * @param expiresAt Default expiration for tokens without specific expiry
+ * @returns Number of tokens actually revoked
  */
 export function revokeTokens(jtis: string[], expiresAt: Date): number {
   let count = 0;
 
   for (const jti of jtis) {
+    const beforeSize = revokedTokens.size;
     revokeToken(jti, expiresAt, 'logout_all');
-    count++;
+    // Only increment if the token was actually added to the revocation list
+    if (revokedTokens.size > beforeSize) {
+      count++;
+    }
   }
 
   return count;

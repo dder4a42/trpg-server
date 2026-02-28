@@ -54,6 +54,9 @@ export function cleanupRateLimitStore(): void {
 /**
  * Start automatic cleanup of expired entries
  * Called automatically when module is loaded
+ *
+ * Note: Uses timer.unref() to allow the Node process to exit naturally
+ * when there's no other work keeping the event loop alive.
  */
 function startAutomaticCleanup(): void {
   if (cleanupTimer) {
@@ -63,6 +66,10 @@ function startAutomaticCleanup(): void {
   cleanupTimer = setInterval(() => {
     cleanupRateLimitStore();
   }, CLEANUP_INTERVAL_MS);
+
+  // Allow process to exit naturally when there's no other work
+  // The timer will keep running as long as the event loop is active
+  cleanupTimer.unref();
 
   authLogger.debug('Rate limiter automatic cleanup started', {
     intervalMs: CLEANUP_INTERVAL_MS,

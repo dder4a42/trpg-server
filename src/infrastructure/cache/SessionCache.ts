@@ -59,12 +59,21 @@ export class SessionCache {
     if (cached) {
       // Check if cache entry is still valid (TTL)
       if (now - cached.cachedAt <= this.config.ttlMs) {
-        // Update access count for LRU
-        cached.accessCount++;
-        authLogger.debug('Cache hit', { sessionId, accessCount: cached.accessCount });
-        return { session: cached.session, user: cached.user };
+        // CRITICAL: Also verify the underlying session hasn't expired
+        // Cache TTL is just a performance optimization - session expiration is the source of truth
+        const sessionExpiresAt = new Date(cached.session.expiresAt).getTime();
+        if (sessionExpiresAt <= now) {
+          // Session itself has expired; remove from cache and treat as miss
+          this.cache.delete(sessionId);
+          authLogger.debug('Cached session expired', { sessionId, sessionExpiresAt });
+        } else {
+          // Session is still valid - cache hit
+          cached.accessCount++;
+          authLogger.debug('Cache hit', { sessionId, accessCount: cached.accessCount });
+          return { session: cached.session, user: cached.user };
+        }
       } else {
-        // Cache entry expired, remove it
+        // Cache entry expired (TTL), remove it
         this.cache.delete(sessionId);
         authLogger.debug('Cache entry expired', { sessionId, age: now - cached.cachedAt });
       }
