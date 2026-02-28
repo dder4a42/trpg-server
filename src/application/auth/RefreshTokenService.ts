@@ -3,7 +3,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { User } from '@/domain/user/types.js';
-import type { ITokenService } from '@/domain/user/repository.js';
+import type { ITokenService, IUserRepository } from '@/domain/user/repository.js';
 import { authLogger, authMetrics, AUTH_METRICS } from '@/utils/auth-logger.js';
 
 export interface RefreshToken {
@@ -38,6 +38,9 @@ export interface RefreshTokenServiceConfig {
  * - Token families: Detects token theft attempts
  * - Compromise detection: If old token from family is used, family is flagged
  * - Global token limit: Prevents unbounded memory growth
+ *
+ * DEVELOPMENT NOTE: Tokens stored in-memory (Map). Lost on server restart.
+ * For production, migrate to database-backed storage in UserSession table.
  */
 export class RefreshTokenService {
   // In-memory storage for refresh tokens (in production, use database)
@@ -47,6 +50,7 @@ export class RefreshTokenService {
 
   constructor(
     private tokenService: ITokenService,
+    private userRepo: IUserRepository,
     private config: RefreshTokenServiceConfig
   ) {}
 
@@ -332,19 +336,7 @@ export class RefreshTokenService {
    * Get user by ID (placeholder - would use UserRepository)
    */
   private async getUserById(userId: string): Promise<User | null> {
-    // This would use UserRepository in production
-    // For now, return a minimal user object
-    return {
-      id: userId,
-      username: 'user',
-      email: 'user@example.com',
-      passwordHash: '',
-      isActive: true,
-      createdAt: new Date(),
-      lastLoginAt: null,
-      failedLoginAttempts: 0,
-      lockedUntil: null,
-    };
+    return this.userRepo.findById(userId);
   }
 }
 
