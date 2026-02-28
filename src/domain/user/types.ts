@@ -10,6 +10,7 @@ export interface User {
   email: string;                 // Email address
   passwordHash: string;          // bcrypt hash
   isActive: boolean;             // Account status
+  isAdmin?: boolean;             // Admin privileges
   createdAt: Date;
   lastLoginAt: Date | null;
   // Security fields

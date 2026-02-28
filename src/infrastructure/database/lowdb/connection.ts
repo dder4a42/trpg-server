@@ -32,6 +32,7 @@ export interface UserRecord {
   created_at: string;
   last_login?: string;
   is_active: number;
+  is_admin?: number;
   // Security fields for account lockout
   failed_login_attempts: number;
   locked_until?: string;
@@ -244,6 +245,13 @@ export class DatabaseConnection {
    */
   async init(): Promise<void> {
     await this.db.read();
+
+    // Initialize version field for existing databases that don't have it
+    // This ensures optimistic locking works for databases created before _version was introduced
+    if (this.db.data._version === undefined) {
+      this.db.data._version = 1;
+      await this.db.write();
+    }
   }
 
   /**
