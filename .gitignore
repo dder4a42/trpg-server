@@ -76,6 +76,7 @@ coverage/
 # Claude Code
 .claude/
 .claude*
+.agents/
 
 # Git worktrees (isolated development workspaces)
 .worktrees/
