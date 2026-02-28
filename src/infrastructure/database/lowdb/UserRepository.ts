@@ -29,6 +29,9 @@ export class UserRepository implements IUserRepository {
       created_at: new Date().toISOString(),
       last_login: null,
       is_active: 1,
+      // Security fields
+      failed_login_attempts: 0,
+      locked_until: null,
     };
 
     this.db.getData().users.push(newUser);
@@ -95,6 +98,12 @@ export class UserRepository implements IUserRepository {
     }
     if (updates.isActive !== undefined) {
       user.is_active = updates.isActive ? 1 : 0;
+    }
+    if (updates.failedLoginAttempts !== undefined) {
+      user.failed_login_attempts = updates.failedLoginAttempts;
+    }
+    if (updates.lockedUntil !== undefined) {
+      user.locked_until = updates.lockedUntil ? updates.lockedUntil.toISOString() : null;
     }
 
     await this.db.write();
@@ -215,6 +224,108 @@ export class UserRepository implements IUserRepository {
       .users.some((u) => u.email?.toLowerCase() === email.toLowerCase());
   }
 
+  /**
+   * Increment failed login attempts
+   */
+  async incrementFailedAttempts(userId: string): Promise<number> {
+    const data = this.db.getData();
+    const user = data.users.find((u) => u.id === userId);
+    if (!user) return 0;
+
+    user.failed_login_attempts = (user.failed_login_attempts || 0) + 1;
+    await this.db.write();
+
+    return user.failed_login_attempts;
+  }
+
+  /**
+   * Reset failed login attempts
+   */
+  async resetFailedAttempts(userId: string): Promise<void> {
+    const data = this.db.getData();
+    const user = data.users.find((u) => u.id === userId);
+    if (!user) return;
+
+    user.failed_login_attempts = 0;
+    user.locked_until = null;
+    await this.db.write();
+  }
+
+  /**
+   * Lock user account until specified time
+   */
+  async lockAccount(userId: string, lockUntil: Date): Promise<void> {
+    const data = this.db.getData();
+    const user = data.users.find((u) => u.id === userId);
+    if (!user) return;
+
+    user.locked_until = lockUntil.toISOString();
+    await this.db.write();
+  }
+
+  /**
+   * Check if user account is locked
+   */
+  async isAccountLocked(userId: string): Promise<boolean> {
+    const user = await this.findById(userId);
+    if (!user) return false;
+
+    if (!user.lockedUntil) return false;
+    return user.lockedUntil > new Date();
+  }
+
+  /**
+   * Atomic increment failed login attempts with lockout check
+   * Returns: { attempts: number, locked: boolean, lockedUntil?: Date }
+   * This prevents race conditions where multiple requests can increment simultaneously
+   */
+  async incrementFailedAttemptsAtomic(
+    userId: string,
+    maxAttempts: number,
+    lockoutDurationMinutes: number
+  ): Promise<{ attempts: number; locked: boolean; lockedUntil?: Date }> {
+    return this.db.atomicUpdate((data) => {
+      const user = data.users.find((u) => u.id === userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const now = new Date();
+      const lockedUntil = user.locked_until ? new Date(user.locked_until) : null;
+
+      // Check if account is currently locked
+      if (lockedUntil && lockedUntil > now) {
+        return {
+          attempts: user.failed_login_attempts || 0,
+          locked: true,
+          lockedUntil,
+        };
+      }
+
+      // Increment failed attempts
+      user.failed_login_attempts = (user.failed_login_attempts || 0) + 1;
+
+      // Check if we should lock the account
+      if (user.failed_login_attempts >= maxAttempts) {
+        const lockUntil = new Date(
+          now.getTime() + lockoutDurationMinutes * 60 * 1000
+        );
+        user.locked_until = lockUntil.toISOString();
+
+        return {
+          attempts: user.failed_login_attempts,
+          locked: true,
+          lockedUntil,
+        };
+      }
+
+      return {
+        attempts: user.failed_login_attempts,
+        locked: false,
+      };
+    });
+  }
+
   private rowToUser(row: any): User {
     return {
       id: row.id,
@@ -224,6 +335,8 @@ export class UserRepository implements IUserRepository {
       createdAt: new Date(row.created_at),
       lastLoginAt: row.last_login ? new Date(row.last_login) : null,
       isActive: row.is_active === 1,
+      failedLoginAttempts: row.failed_login_attempts || 0,
+      lockedUntil: row.locked_until ? new Date(row.locked_until) : null,
     };
   }
 }

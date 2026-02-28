@@ -28,6 +28,13 @@ export interface IUserRepository {
   // Statistics
   count(): Promise<number>;
   countActive(): Promise<number>;
+
+  // Account lockout methods
+  incrementFailedAttempts(userId: string): Promise<number>;
+  incrementFailedAttemptsAtomic(userId: string, maxAttempts: number, lockoutDurationMinutes: number): Promise<{ attempts: number; locked: boolean; lockedUntil?: Date }>;
+  resetFailedAttempts(userId: string): Promise<void>;
+  lockAccount(userId: string, lockUntil: Date): Promise<void>;
+  isAccountLocked(userId: string): Promise<boolean>;
 }
 
 /**
@@ -37,10 +44,12 @@ export interface IUserSessionRepository {
   create(session: Omit<UserSession, 'id'> & { id?: string }): Promise<UserSession>;
   findById(sessionId: string): Promise<UserSession | null>;
   findByUserId(userId: string): Promise<UserSession[]>;
+  update(session: UserSession): Promise<void>; // For sliding expiration
   delete(sessionId: string): Promise<boolean>;
   deleteByUserId(userId: string): Promise<number>; // Returns count deleted
   deleteExpired(): Promise<number>; // Returns count deleted
   isValid(sessionId: string): Promise<boolean>;
+  extendSessionIfExpired(sessionId: string, refreshThreshold: Date, sessionTimeoutHours: number): Promise<{ extended: boolean; expired: boolean }>;
 }
 
 /**
@@ -63,4 +72,25 @@ export interface IAuthService {
   changePassword(userId: string, oldPassword: string, newPassword: string): Promise<boolean>;
   resetPasswordRequest(email: string): Promise<void>; // Sends email
   resetPassword(token: string, newPassword: string): Promise<boolean>;
+}
+
+/**
+ * Token payload interface (decoded JWT)
+ */
+export interface TokenPayload {
+  userId: string;
+  username: string;
+  isAdmin: boolean;
+  iat: number;
+  exp: number;
+  jti: string;
+}
+
+/**
+ * Token service interface for JWT operations
+ */
+export interface ITokenService {
+  sign(user: User): Promise<{ accessToken: string; expiresIn: number }>;
+  verify(token: string): Promise<TokenPayload | null>;
+  getJti(token: string): string | null;
 }
