@@ -56,12 +56,15 @@ async function main(): Promise<void> {
     { sessionTimeoutHours: 24, bcryptRounds: 10 }
   );
 
-  // Initialize token service for JWT support
-  console.log('Initializing token service...');
-  const tokenService = createTokenService();
-
-  // Wire token service into auth service
-  authService.setTokenService(tokenService);
+  // Initialize token service for JWT support (optional)
+  let tokenService: ReturnType<typeof createTokenService> | undefined;
+  if (process.env.JWT_SECRET || process.env.AUTH_SECRET) {
+    console.log('Initializing token service (JWT support enabled)...');
+    tokenService = createTokenService();
+    authService.setTokenService(tokenService);
+  } else {
+    console.log('JWT secret not configured - session-based auth only');
+  }
 
   // Create auth module with token service
   const authModule = createAuthModule(authService, tokenService, { webLoginPath: '/login' });
