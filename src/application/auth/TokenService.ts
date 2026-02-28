@@ -241,7 +241,8 @@ export function createTokenService(): TokenService {
   // Validate secret: must exist, not be empty, and have minimum length
   const MIN_SECRET_LENGTH = 32;
 
-  if (!secret || typeof secret !== 'string' || secret.trim().length < MIN_SECRET_LENGTH) {
+  // Check raw secret length BEFORE trim
+  if (!secret || typeof secret !== 'string' || secret.length < MIN_SECRET_LENGTH) {
     throw new Error(
       `JWT_SECRET or AUTH_SECRET environment variable is required (minimum ${MIN_SECRET_LENGTH} characters)`
     );
